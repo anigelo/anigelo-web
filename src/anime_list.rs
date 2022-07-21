@@ -1,13 +1,12 @@
 use yew::prelude::*;
-use std::path::PathBuf;
 use serde::Deserialize;
 
 #[derive(Deserialize, Debug, Clone, PartialEq)]
 pub struct AnimeHeader {
     pub id: String,
     pub title: String,
-    pub backdrop: PathBuf,
-    pub poster: PathBuf,
+    pub backdrop: String,
+    pub poster: String,
     pub description: String
 }
 
@@ -33,17 +32,17 @@ fn view_list_item(anime: &AnimeHeader) -> Html {
     html! {
         <div class="anime_card">
           <div class="info_section">
-            <div class="movie_header">
-              <img class="locandina" src={format!("file://{}", anime.poster.to_str().unwrap())}/>
+            <div class="anime_header">
+              <img class="locandina" src={format!("http://localhost:8088/static/{}", anime.poster)}/>
               <h1>{&anime.title}</h1>
             </div>
-            <div class="movie_desc">
+            <div class="anime_desc">
               <p class="text">
                 {&anime.description}
               </p>
             </div>
           </div>
-          <div class="blur_back bright_back"></div>
+          <div class="blur_back" style={format!("background: url('http://localhost:8088/static/{}');", anime.backdrop)}></div>
         </div>
     }
 }

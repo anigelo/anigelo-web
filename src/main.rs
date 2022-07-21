@@ -30,7 +30,6 @@ pub fn app() -> Html {
 
     html! {
             <main>
-                <h1>{ "Animes" }</h1>
                 <AnimeList animes={(*animes).clone()} />
             </main>
         }
