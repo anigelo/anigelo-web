@@ -1,36 +1,47 @@
-mod anime_list;
+mod pages;
+mod components;
 
 use dotenv::dotenv;
-use reqwasm::http::Request;
 use yew::prelude::*;
-use crate::anime_list::{AnimeList,AnimeHeader};
+use yew_router::prelude::*;
+use crate::pages::anime_list::{AnimeList};
+use crate::pages::season_list::SeasonList;
+use crate::pages::episode_list::EpisodeList;
+use crate::pages::player::Player;
 
 fn main() {
     dotenv().ok();
-
     yew::start_app::<App>();
+}
+
+#[derive(Clone, Routable, PartialEq)]
+enum Route {
+    #[at("/")]
+    Home,
+    #[at("/:id")]
+    Seasons { id: String },
+    #[at("/:id/s/:season")]
+    Episodes { id: String, season: u8 },
+    #[at("/:id/s/:season/ep/:episode")]
+    Playback { id: String, season: u8, episode: u32 }
+}
+
+fn switch(routes: &Route) -> Html {
+    match routes.clone() {
+        Route::Home => html! { <AnimeList /> },
+        Route::Seasons { id} => html! { <SeasonList id={id} /> },
+        Route::Episodes { id, season } => html! { <EpisodeList id={id} season={season} />},
+        Route::Playback { id, season, episode} => html! { <Player id={id} season={season} episode={episode} /> }
+    }
 }
 
 #[function_component(App)]
 pub fn app() -> Html {
-    let animes = use_state(|| vec![]);
-    {
-        let animes = animes.clone();
-        use_effect_with_deps(move |_| {
-            let animes = animes.clone();
-            wasm_bindgen_futures::spawn_local(async move {
-                let fetched_animes = Request::get("http://localhost:8088/media")
-                    .send().await.unwrap()
-                    .json::<Vec<AnimeHeader>>().await.unwrap();
-                animes.set(fetched_animes);
-            });
-            || ()
-        }, ());
-    }
-
     html! {
+        <BrowserRouter>
             <main>
-                <AnimeList animes={(*animes).clone()} />
+                <Switch<Route> render={Switch::render(switch)} />
             </main>
-        }
+        </BrowserRouter>
+    }
 }
